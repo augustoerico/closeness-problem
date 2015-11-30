@@ -53,12 +53,24 @@ rankCloseness graph =
 {- ----------------------------------------------------------------------------
 Test cases - TODO put this in a different file
 ---------------------------------------------------------------------------- -}
-testFarness
-    | result == 9   = "Test farness OK!"
-    | otherwise     = "Test farness FAILED!"
-    where result = farness 1 [(1,2),(1,3),(1,4),(5,2),(6,2),(3,6),(6,7),(7,3)]
+testFarnessGraph1 n r
+    | result == r   = True  -- success
+    | otherwise     = False -- failure
+    where result = farness n [(1,2),(1,3),(1,4),(5,2),(6,2),(3,6),(6,7),(7,3)]
     
+-- FIXME which one failed? BROKEN...
+{-
+testFarness1 = testFarnessGraph1 1 9
+testFarness2 = testFarnessGraph1 3 10
+testFarness3 = testFarnessGraph1 7 12
+testFarness 
+    | testFarness1 and testFarness2 and testFarness3 = "Test farness OK"
+    | otherwise = "Test farness NOT OK"
+    -}
+
+{- BROKEN...
 testCloseness
     | result == div 1 9 = "Test closeness OK!"
     | otherwise     = "Test closeness FAILED!"
     where result = closeness 1 [(1,2),(1,3),(1,4),(5,2),(6,2),(3,6),(6,7),(7,3)]
+    -}
