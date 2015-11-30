@@ -37,6 +37,28 @@ second x n
     | snd x `elem` n    = []
     | otherwise         = [snd x]
 
+farness :: Eq a => a -> [(a,a)] -> Int
 farness node graph
     = sum [shortest (paths node target graph) - 1 | target <- (nodes graph)]
---    = [(target, shortest (paths node target graph)) | target <- (nodes graph)]
+
+-- FIXME this always returns 0...
+closeness :: Eq a => a -> [(a,a)] -> Int
+closeness node graph
+    = div 1 (farness node graph)
+    
+-- Return a list of tuples (node, closeness)
+rankCloseness graph = 
+    [(n, (closeness n graph)) | n <- (nodes graph)]
+
+{- ----------------------------------------------------------------------------
+Test cases - TODO put this in a different file
+---------------------------------------------------------------------------- -}
+testFarness
+    | result == 9   = "Test farness OK!"
+    | otherwise     = "Test farness FAILED!"
+    where result = farness 1 [(1,2),(1,3),(1,4),(5,2),(6,2),(3,6),(6,7),(7,3)]
+    
+testCloseness
+    | result == div 1 9 = "Test closeness OK!"
+    | otherwise     = "Test closeness FAILED!"
+    where result = closeness 1 [(1,2),(1,3),(1,4),(5,2),(6,2),(3,6),(6,7),(7,3)]
