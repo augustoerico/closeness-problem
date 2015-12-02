@@ -18,11 +18,13 @@ paths2 source target graph current (x:xs)
         (paths1 x target graph (current ++ [source])) ++ (paths2 source target graph current xs)
 
 -- Get the size of the shortest list
+shortest :: Eq a => [[a]] -> Int
 shortest (x:xs) = shortest' xs (length x)
-shortest' [] current    = current
+shortest' :: Eq a => [[a]] -> Int -> Int
+shortest' [] current        = current
 shortest' (x:xs) current
-    | current > length x = shortest' xs (length x)
-    | otherwise                 = shortest' xs current
+    | current > length x    = shortest' xs (length x)
+    | otherwise             = shortest' xs current
     
 -- Get all nodes from graph
 nodes graph = nodes' graph [] 
@@ -42,13 +44,19 @@ farness node graph
     = sum [shortest (paths node target graph) - 1 | target <- (nodes graph)]
 
 -- FIXME this always returns 0...
-closeness :: Eq a => a -> [(a,a)] -> Int
-closeness node graph
-    = div 1 (farness node graph)
+closeness' :: Eq a => a -> [(a,a)] -> Float
+closeness' node graph
+    = 1.0 / (fromIntegral (farness node graph))
     
 -- Return a list of tuples (node, closeness)
-rankCloseness graph = 
-    [(n, (closeness n graph)) | n <- (nodes graph)]
+-- TODO create a list already sorted
+closeness graph = 
+    [(n, (closeness' n graph)) | n <- (nodes graph)]
+    
+-- Sort (node, closeness) tuple using quicksort
+rankCloseness []    = []
+rankCloseness (x:xs) =
+    rankCloseness [a | a <- xs, snd a > snd x ] ++ [x] ++ rankCloseness [a | a <- xs, snd a <= snd x]
 
 {- ----------------------------------------------------------------------------
 Test cases - TODO put this in a different file
@@ -58,15 +66,26 @@ testFarnessGraph1 n r
     | otherwise     = False -- failure
     where result = farness n [(1,2),(1,3),(1,4),(5,2),(6,2),(3,6),(6,7),(7,3)]
     
--- FIXME which one failed? BROKEN...
-{-
+-- FIXME which one failed?
 testFarness1 = testFarnessGraph1 1 9
 testFarness2 = testFarnessGraph1 3 10
 testFarness3 = testFarnessGraph1 7 12
+{- 
 testFarness 
     | testFarness1 and testFarness2 and testFarness3 = "Test farness OK"
     | otherwise = "Test farness NOT OK"
-    -}
+-}
+
+-- FIXME this test should consider some way to untie
+testRankCloseness input r
+    | result == r   = True
+    | otherwise     = False
+    where result = rankCloseness input
+    
+testRankCloseness1 = testRankCloseness [(1,1/1234),(2,1/987),(3,1/800),(4,1/732),(5,1/667),(6,1/500)] [(6,1/500),(5,1/667),(4,1/732),(3,1/800),(2,1/987),(1,1/1234)]
+testRankCloseness2 = testRankCloseness [(1,1/2),(2,2/5),(3,3/7)] [(1,1/2),(3,3/7),(2,2/5)]
+testRankCloseness3 = testRankCloseness [(5,0.07142857),(6,0.1),(1,0.1111111),(2,0.1111111),(3,0.1),(7,0.08333334),(4,0.07142857)] [(1,0.1111111),(2,0.1111111),(6,0.1),(3,0.1),(7,0.08333334),(5,0.07142857),(4,0.07142857)]
+
 
 {- BROKEN...
 testCloseness
