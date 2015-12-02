@@ -1,4 +1,19 @@
 import Data.List
+import System.IO
+
+{- ----------------------------------------------------------------------------
+Main
+---------------------------------------------------------------------------- -}
+
+-- TODO build graph from input file
+main = do
+    contents <- readFile "edges.txt"
+    putStr contents
+    -- rankCloseness graph
+
+{- ----------------------------------------------------------------------------
+Graph-related functions
+---------------------------------------------------------------------------- -}
 
 -- Get all paths
 paths :: Eq a => a -> a -> [(a,a)] -> [[a]]
@@ -43,7 +58,6 @@ farness :: Eq a => a -> [(a,a)] -> Int
 farness node graph
     = sum [shortest (paths node target graph) - 1 | target <- (nodes graph)]
 
--- FIXME this always returns 0...
 closeness' :: Eq a => a -> [(a,a)] -> Float
 closeness' node graph
     = 1.0 / (fromIntegral (farness node graph))
@@ -57,6 +71,17 @@ closeness graph =
 rankCloseness []    = []
 rankCloseness (x:xs) =
     rankCloseness [a | a <- xs, snd a > snd x ] ++ [x] ++ rankCloseness [a | a <- xs, snd a <= snd x]
+
+{- ----------------------------------------------------------------------------
+Auxiliar functions
+---------------------------------------------------------------------------- -}
+
+-- TODO use it to build graph from input file
+toTuple :: [a] -> (a, a)
+toTuple [a, b] = (a, b)
+
+lineToTuple :: [Char] -> ([Char], [Char])
+lineToTuple l = toTuple (words l)
 
 {- ----------------------------------------------------------------------------
 Test cases - TODO put this in a different file
@@ -85,11 +110,3 @@ testRankCloseness input r
 testRankCloseness1 = testRankCloseness [(1,1/1234),(2,1/987),(3,1/800),(4,1/732),(5,1/667),(6,1/500)] [(6,1/500),(5,1/667),(4,1/732),(3,1/800),(2,1/987),(1,1/1234)]
 testRankCloseness2 = testRankCloseness [(1,1/2),(2,2/5),(3,3/7)] [(1,1/2),(3,3/7),(2,2/5)]
 testRankCloseness3 = testRankCloseness [(5,0.07142857),(6,0.1),(1,0.1111111),(2,0.1111111),(3,0.1),(7,0.08333334),(4,0.07142857)] [(1,0.1111111),(2,0.1111111),(6,0.1),(3,0.1),(7,0.08333334),(5,0.07142857),(4,0.07142857)]
-
-
-{- BROKEN...
-testCloseness
-    | result == div 1 9 = "Test closeness OK!"
-    | otherwise     = "Test closeness FAILED!"
-    where result = closeness 1 [(1,2),(1,3),(1,4),(5,2),(6,2),(3,6),(6,7),(7,3)]
-    -}
